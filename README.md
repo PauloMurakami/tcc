@@ -9,4 +9,4 @@ Steps to run this project:
 
 
 mysql docker command : 
-docker run --name tcc -e MYSQL_ROOT_PASSWORD=root -d mysql:5.7
+docker run --name tcc -e MYSQL_ROOT_PASSWORD=root -p 3306:3306 -d mysql:5.7
