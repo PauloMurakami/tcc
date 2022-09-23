@@ -2,7 +2,7 @@ import { compare } from 'bcryptjs';
 import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { User } from '../entity/User';
-import { sign } from 'jsonwebtoken'
+import { sign } from 'jsonwebtoken';
 class AuthController {
     async autenticacao(req: Request, res: Response) {
         const userRepository = AppDataSource.getRepository(User)
@@ -21,6 +21,7 @@ class AuthController {
         const token = sign({id: userExists.id}, 'Batata', {expiresIn: '1d'} )
 
         delete userExists.senha;
+        delete userExists.role;
 
         return res.json({
             userExists,
