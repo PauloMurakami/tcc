@@ -1,5 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from "typeorm"
-import { hashSync } from 'bcryptjs'
+import { hashSync } from 'bcryptjs';
+
+export enum RoleEnumType {
+    ALUNO = 'aluno',
+    PROFESSOR = 'professor',
+    FACULDADE = 'faculdade',
+  }
 @Entity()
 export class User {
 
@@ -14,6 +20,13 @@ export class User {
 
     @Column()
     senha: string
+
+    @Column({
+        type: 'enum',
+        enum: RoleEnumType,
+        default: RoleEnumType.ALUNO,
+    })
+    role: RoleEnumType.ALUNO;
 
     @BeforeInsert()
     @BeforeUpdate()
