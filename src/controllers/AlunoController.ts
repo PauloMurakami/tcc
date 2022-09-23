@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { User } from '../entity/User';
-import { sign } from 'jsonwebtoken';
 
-class UserController {
+class AlunoController {
     async register(req: Request, res: Response) {
         const userRepository = AppDataSource.getRepository(User)
         const { email, senha, nome } = req.body
@@ -24,4 +23,4 @@ class UserController {
     }
 }
 
-export default new UserController;
+export default new AlunoController;

@@ -2,7 +2,7 @@ import { compare } from 'bcryptjs';
 import { Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { User } from '../entity/User';
-import { sign } from 'jsonwebtoken';
+import { cadastraToken } from '../config/jwtConfig';
 class AuthController {
     async autenticacao(req: Request, res: Response) {
         const userRepository = AppDataSource.getRepository(User)
@@ -15,11 +15,10 @@ class AuthController {
 
         const senhaValida = await compare(senha, userExists.senha)
 
-        if(!senhaValida){
+        if (!senhaValida) {
             return res.sendStatus(401);
         }
-        const token = sign({id: userExists.id}, 'Batata', {expiresIn: '1d'} )
-
+        const token = cadastraToken({ id: userExists.id })
         delete userExists.senha;
         delete userExists.role;
 
