@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { DataSource } from "typeorm"
 import { Evento } from "./entity/Eventos"
+import { ListaDeCadastrados } from "./entity/ListaDeCadastrados"
 import { User } from "./entity/User"
 
 export const AppDataSource = new DataSource({
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
     database: "tcc",
     synchronize: true,
     logging: false,
-    entities: [User , Evento],
+    entities: [User , Evento, ListaDeCadastrados],
     migrations: [],
     subscribers: [],
 })

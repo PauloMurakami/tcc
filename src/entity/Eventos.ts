@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, ManyToOne } from "typeorm"
-import { hashSync } from 'bcryptjs';
 import { User } from "./User";
 
 export enum EnumStatus {
