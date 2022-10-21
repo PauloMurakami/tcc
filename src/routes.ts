@@ -15,6 +15,7 @@ router.post('/register-teacher', roleFaculdadeTokenMidlleware, ProfessorControll
 router.post('/register-event', roleProfessorTokenMidlleware, EventoController.createEvento)
 router.get('/find-events-open', tokenMiddleware, EventoController.findEventsOpen)
 router.get('/join-event/:id',tokenMiddleware,  EventoController.joinEvent)
+router.get('/find-events', tokenMiddleware, EventoController.findEvents)
 router.get('/testeMiddleware', tokenMiddleware, (req: Request, res: Response) => {
     res.sendStatus(200)
 })
