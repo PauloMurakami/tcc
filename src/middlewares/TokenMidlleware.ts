@@ -2,18 +2,16 @@ import { NextFunction, Request, Response } from "express";
 import { verificaToken } from "../config/jwtConfig";
 
 export default async function tokenMiddleware(req: Request, res: Response, next: NextFunction) {
-    const { authorization } = req.headers;
-    if (!authorization) {
-        res.sendStatus(401);
-    }
-    const token = authorization.replace('Barer', '').trim();
-
     try {
+        const { authorization } = req.headers;
+        if (!authorization) {
+            throw new Error("");
+        }
+        const token = authorization.replace('Barer', '').trim();
+
         const data: any = verificaToken(token)
-        req.headers.id = data.id;
-        req.headers.role = data.role;
         next();
     } catch {
-        res.sendStatus(500);
+        res.sendStatus(401);
     }
 }

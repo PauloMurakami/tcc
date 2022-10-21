@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { verificaToken } from "../config/jwtConfig";
 import { RoleEnumType } from "../entity/User";
 
-export default async function roleFaculdadeTokenMidlleware(req: Request, res: Response, next: NextFunction) {
+export default async function roleProfessorTokenMidlleware(req: Request, res: Response, next: NextFunction) {
     try {
         const { authorization } = req.headers;
         if (!authorization) {
@@ -12,8 +12,8 @@ export default async function roleFaculdadeTokenMidlleware(req: Request, res: Re
 
         const data: any = verificaToken(token)
 
-        if (data.role != RoleEnumType.FACULDADE) {
-            res.sendStatus(401);
+        if (data.role != RoleEnumType.PROFESSOR) {
+            return res.sendStatus(401);
         }
         next();
     } catch {

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToMany } from "typeorm"
 import { hashSync } from 'bcryptjs';
+import { Evento } from "./Eventos";
 
 export enum RoleEnumType {
     ALUNO = 'aluno',
@@ -10,7 +11,7 @@ export enum RoleEnumType {
 export class User {
 
     @PrimaryGeneratedColumn('uuid')
-    id: number
+    id: string
 
     @Column()
     nome: string
@@ -27,10 +28,14 @@ export class User {
         default: RoleEnumType.ALUNO,
     })
     role: RoleEnumType;
+    
+    @OneToMany(() => Evento, (evento) => evento.user)
+    eventos: Evento[]
 
     @BeforeInsert()
     @BeforeUpdate()
     hashSenha(){
         this.senha = hashSync(this.senha, 8)
     }
+
 }
