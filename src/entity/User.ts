@@ -26,7 +26,7 @@ export class User {
         enum: RoleEnumType,
         default: RoleEnumType.ALUNO,
     })
-    role: RoleEnumType.ALUNO;
+    role: RoleEnumType;
 
     @BeforeInsert()
     @BeforeUpdate()

@@ -18,7 +18,7 @@ class AuthController {
         if (!senhaValida) {
             return res.sendStatus(401);
         }
-        const token = cadastraToken({ id: userExists.id })
+        const token = cadastraToken({ id: userExists.id, role: userExists.role})
         delete userExists.senha;
         delete userExists.role;
 
