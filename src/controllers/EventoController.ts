@@ -10,7 +10,7 @@ class EventoController {
         const userRepository = AppDataSource.getRepository(User);
         const eventoRepository = AppDataSource.getRepository(Evento);
         const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data } = req.body
-        const userId = getIdJWT(req.headers.authorization.toString());
+        const userId = res.locals.tokenData.id;
         const userExists = await userRepository.findOne({ where: { id: userId } })
         if (!userExists) {
             res.sendStatus(401);
@@ -41,7 +41,7 @@ class EventoController {
             const id = req.params.id;
             const eventoRepository = AppDataSource.getRepository(Evento);
             const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados);
-            const userId = getIdJWT(req.headers.authorization.toString());
+            const userId = res.locals.tokenData.id;
 
             const eventosExistente = await eventoRepository.findOne({ where: { id: id, status: EnumStatus.ABERTO } })
             if (!eventosExistente) {
@@ -68,8 +68,19 @@ class EventoController {
         } catch (error) {
             res.status(422).send({ message: error.message })
         }
-
     }
+    async outEvent(req: Request, res: Response) {
+        try {
+            const id = req.params.id;
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const eventosExistente = await eventoRepository.findOne({ where: { id: id, status: EnumStatus.ABERTO } })
+            
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+            
+        }
+    }
+      
 }
 
 export default new EventoController
