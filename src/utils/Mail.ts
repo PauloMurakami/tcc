@@ -1,5 +1,7 @@
 import * as nodemailer from "nodemailer";
+import { IResponsePDF } from "../@types/pdf";
 import config from '../config/mailConfig';
+import { deletarPDF } from "./pdf";
 
 class Mail {
 
@@ -9,36 +11,39 @@ class Mail {
         public message?: string) { }
 
 
-    async sendMail() {
-        return new Promise<any>((resolve, reject) => {
-            let mailOptions = {
-                from: "noreply@gmail.com",
-                to: this.to,
-                subject: this.subject,
-                html: this.message
-            };
+    async sendMail(id: string) {
+        let mailOptions = {
+            from: "noreply@gmail.com",
+            to: this.to,
+            subject: this.subject,
+            html: this.message,
+            attachments: [{
+                filename: `${id}.pdf`,
+                path: `./src/public/assets/${id}.pdf`,
+                contentType: 'application/pdf'
+            }]
+        };
 
-            const transporter = nodemailer.createTransport({
-                host: config.host,
-                port: config.port,
-                secure: false,
-                auth: {
-                    user: config.user,
-                    pass: config.password
-                },
-                tls: { rejectUnauthorized: false }
-            });
+        const transporter = nodemailer.createTransport({
+            host: config.host,
+            port: config.port,
+            secure: false,
+            auth: {
+                user: config.user,
+                pass: config.password
+            },
+            tls: { rejectUnauthorized: false }
+        });
 
-            resolve(
-                transporter.sendMail(mailOptions, function (error, info) {
-                    if (error) {
-                        return error;
-                    } else {
-                        return "E-mail enviado com sucesso!";
-                    }
-                })
-            )
-        })
+        return Promise.resolve(transporter.sendMail(mailOptions,async function (error, info) {
+            console.log('enviando')
+            if (error) {
+                return error;
+            } else {
+                await deletarPDF(id)
+                return "E-mail enviado com sucesso!";
+            }
+        }))
     }
 
 }

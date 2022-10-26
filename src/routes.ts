@@ -20,11 +20,7 @@ router.get('/join-event/:id', decodeTokenMiddleware, tokenMiddleware, EventoCont
 router.get('/find-events', decodeTokenMiddleware, tokenMiddleware, EventoController.findEvents)
 router.post('/send-certificate/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.sendCertificate)
 router.get('/testeMiddleware', decodeTokenMiddleware, tokenMiddleware, (req: Request, res: Response) => {
-    Mail.to = "ppmura13@gmail.com";
-    Mail.subject = "teste";
-    Mail.message = "mensagem";
-    let result = Mail.sendMail();
-    res.send({result})
+    res.sendStatus(200)
 })
 
 router.get('/health', (req: Request, res: Response) => {

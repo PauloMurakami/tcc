@@ -23,7 +23,6 @@ AppDataSource.initialize().then(async () => {
   //Podemos utilizar aqui para criar o usuario root do sistema (como a faculdade)
 
 }).catch(error => console.log(error))
-
 app.use(express.json())
 app.use(cors())
 app.use(router)
