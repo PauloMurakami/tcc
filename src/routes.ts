@@ -3,8 +3,8 @@ import AlunoController from './controllers/AlunoController';
 import AuthController from './controllers/AuthController';
 import EventoController from './controllers/EventoController';
 import ProfessorController from './controllers/ProfessorController';
-import checkRoleFaculdadeMiddleware from './middlewares/CheckRoleFaculdadeMiddleware';
-import checkRoleProfessorMidlleware from './middlewares/CheckRoleProfessorMidlleware';
+import { RoleEnumType } from './entity/User';
+import checkRoleMiddleware from './middlewares/CheckRoleMiddleware';
 import decodeTokenMiddleware from './middlewares/DecodeBearerTokenMiddleware';
 import tokenMiddleware from './middlewares/TokenMidlleware';
 
@@ -12,10 +12,8 @@ const router = Router();
 
 router.post('/register', AlunoController.register)
 router.post('/auth', AuthController.autenticacao)
-router.post('/register-teacher', decodeTokenMiddleware, checkRoleFaculdadeMiddleware, ProfessorController.register)
-router.post('/register-event', decodeTokenMiddleware, checkRoleProfessorMidlleware, EventoController.createEvento)
-// router.post('/register-teacher', roleFaculdadeTokenMidlleware, ProfessorController.register)
-// router.post('/register-event', roleProfessorTokenMidlleware, EventoController.createEvento)
+router.post('/register-teacher', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.register)
+router.post('/register-event', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.createEvento)
 router.get('/find-events-open', tokenMiddleware, EventoController.findEventsOpen)
 router.get('/join-event/:id',tokenMiddleware,  EventoController.joinEvent)
 router.get('/find-events', tokenMiddleware, EventoController.findEvents)
