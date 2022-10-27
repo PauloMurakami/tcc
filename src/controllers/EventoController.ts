@@ -3,7 +3,8 @@ import { AppDataSource } from "../data-source";
 import { EnumStatus, Evento } from "../entity/Eventos";
 import { ListaDeCadastrados } from "../entity/ListaDeCadastrados";
 import { User } from "../entity/User";
-import Mail from "../utils/Mail";
+import * as nodemailer from "nodemailer";
+import config from '../config/mailConfig';
 import { criarPDF, deletarPDF } from "../utils/pdf";
 
 class EventoController {
@@ -115,11 +116,33 @@ class EventoController {
             `,
                 id: usuarioExistente.id
             })
-            Mail.to = usuarioExistente.email;
-            Mail.subject = "teste";
-            Mail.message = ``;
-            await Mail.sendMail(usuarioExistente.id);
-            res.send({ message: "Email enviado com sucesso" }).status(200)
+            let mailOptions = {
+                from: 'paulolindus@hotmail.com',
+                to: usuarioExistente.email,
+                subject: "teste",
+                html: '',
+                attachments: [{
+                    filename: `${id}.pdf`,
+                    path: `./src/public/assets/${id}.pdf`,
+                    contentType: 'application/pdf'
+                }]
+            };
+    
+            const transporter = nodemailer.createTransport({
+                service: 'Hotmail',
+                auth: {
+                    user: config.user,
+                    pass: config.password
+                },
+            });
+            return transporter.sendMail(mailOptions, async function (error, info) {
+                if (error) {
+                    res.send({message: 'Erro ao enviar o email'}).status(500)
+                } else {
+                    await deletarPDF(id)
+                    res.send({ message: "Email enviado com sucesso" }).status(200)
+                }
+            })
 
         } catch (error) {
             res.status(422).send({ message: error.message })
