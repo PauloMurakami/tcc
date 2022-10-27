@@ -3,7 +3,6 @@ import { AppDataSource } from "../data-source";
 import { EnumStatus, Evento } from "../entity/Eventos";
 import { ListaDeCadastrados } from "../entity/ListaDeCadastrados";
 import { User } from "../entity/User";
-import { getIdJWT } from "../utils/getInfoJWT";
 import Mail from "../utils/Mail";
 import { criarPDF, deletarPDF } from "../utils/pdf";
 

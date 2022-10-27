@@ -7,7 +7,6 @@ import { RoleEnumType } from './entity/User';
 import checkRoleMiddleware from './middlewares/CheckRoleMiddleware';
 import decodeTokenMiddleware from './middlewares/DecodeBearerTokenMiddleware';
 import tokenMiddleware from './middlewares/TokenMidlleware';
-import Mail from './utils/Mail';
 
 const router = Router();
 
