@@ -1,10 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, ManyToOne } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm"
 
-export enum EnumStatus {
-    ABERTO = 'aberto',
-    CHEIO = 'cheio',
-    FECHADO = 'fechado',
-  }
 @Entity()
 export class ListaDeCadastrados {
     @PrimaryGeneratedColumn()
@@ -16,4 +11,6 @@ export class ListaDeCadastrados {
     @Column()
     evento: string;
 
+    @Column('boolean', {default: false})
+    emailEnviado: boolean = false;
 }

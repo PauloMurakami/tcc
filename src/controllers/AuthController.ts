@@ -20,7 +20,6 @@ class AuthController {
         }
         const token = cadastraToken({ id: userExists.id, role: userExists.role})
         delete userExists.senha;
-        delete userExists.role;
 
         return res.json({
             userExists,
