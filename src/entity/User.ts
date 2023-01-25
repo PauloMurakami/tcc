@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToMany, ManyToMany, JoinTable } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, OneToMany, ManyToMany, JoinTable, PrimaryColumn } from "typeorm"
 import { hashSync } from 'bcryptjs';
 import { Evento } from "./Eventos";
 
@@ -13,6 +13,9 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
+    @PrimaryColumn()
+    RA: number
+    
     @Column()
     nome: string
 

@@ -6,9 +6,11 @@ import { User } from "../entity/User";
 import * as nodemailer from "nodemailer";
 import config from '../config/mailConfig';
 import { criarPDF, deletarPDF } from "../utils/pdf";
+import { loggerError, loggerInfo, loggerWarn, loggerWarnItem } from "../utils/logger";
 
 class EventoController {
     async createEvento(req: Request, res: Response) {
+        loggerInfo("exec createEvento");
         const userRepository = AppDataSource.getRepository(User);
         const eventoRepository = AppDataSource.getRepository(Evento);
         const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data } = req.body
@@ -25,6 +27,7 @@ class EventoController {
 
     }
     async findEvents(req: Request, res: Response) {
+        loggerInfo("exec findEvents");
         const eventoRepository = AppDataSource.getRepository(Evento);
         const eventosExistentes = await eventoRepository.find()
         res.json({
@@ -32,6 +35,7 @@ class EventoController {
         })
     }
     async findEventsOpen(req: Request, res: Response) {
+        loggerInfo("exec findEventsOpen");
         const eventoRepository = AppDataSource.getRepository(Evento);
         const eventosExistentes = await eventoRepository.find({ where: { status: EnumStatus.ABERTO } })
         res.json({
@@ -40,6 +44,7 @@ class EventoController {
     }
     async joinEvent(req: Request, res: Response) {
         try {
+            loggerInfo("exec joinEvent");
             const id = req.params.id;
             const eventoRepository = AppDataSource.getRepository(Evento);
             const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados);
@@ -47,6 +52,7 @@ class EventoController {
 
             const eventosExistente = await eventoRepository.findOne({ where: { id: id, status: EnumStatus.ABERTO } })
             if (!eventosExistente) {
+                loggerError("Evento Lotado!");
                 throw new Error("Evento Indisponivel!");
             }
 
@@ -58,10 +64,12 @@ class EventoController {
                 await eventoRepository.update(
                     eventosExistente.id,
                     eventosExistente)
+                loggerWarn("Evento Lotado!");
                 throw new Error("Evento Lotado");
             }
             const usuarioJaCadastrado = await listaDeCadastradosRepository.find({ where: { evento: eventosExistente.id, usuario: userId } })
             if (usuarioJaCadastrado.length > 0) {
+                loggerWarn("Usuario ja cadastrado nesse evento!");
                 throw new Error("Usuario ja cadastrado nesse evento!");
             }
             const cadastrarUsuario = listaDeCadastradosRepository.create({ usuario: userId, evento: eventosExistente.id })
@@ -85,6 +93,7 @@ class EventoController {
     }
     async sendCertificate(req: Request, res: Response) {
         try {
+            loggerInfo("exec sendCertificate");
             const id = req.params.id;
             const idEvent = req.body.idEvent
             const eventoRepository = AppDataSource.getRepository(Evento);
@@ -92,11 +101,13 @@ class EventoController {
 
             const eventoExistente = await eventoRepository.findOne({ where: { id: idEvent } })
             if (!eventoExistente) {
+                loggerError("Evento não encontrado!");
                 throw new Error("Evento não encontrado");
             }
 
             const usuarioExistente = await userRepository.findOne({ where: { id: id } })
             if (!usuarioExistente) {
+                loggerError("Usuario não encontrado!");
                 throw new Error("Usuario não encontrado");
             }
             await criarPDF({
@@ -135,11 +146,13 @@ class EventoController {
                     pass: config.password
                 },
             });
+            loggerInfo("Enviando email")
             return transporter.sendMail(mailOptions, async function (error, info) {
                 if (error) {
                     res.send({message: 'Erro ao enviar o email'}).status(500)
                 } else {
                     await deletarPDF(id)
+                    loggerInfo("Email enviado")
                     res.send({ message: "Email enviado com sucesso" }).status(200)
                 }
             })

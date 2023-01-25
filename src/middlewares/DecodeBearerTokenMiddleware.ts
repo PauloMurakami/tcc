@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { verificaToken } from "../config/jwtConfig";
+import { loggerInfo } from "../utils/logger";
 
 export default async function DecodeTokenMiddleware(req: Request, res: Response, next: NextFunction) {
     try {
+        loggerInfo("Start decode TokenMiddleware");
         const { authorization } = req.headers;
         if (!authorization) {
             throw new Error("");
