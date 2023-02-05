@@ -47,7 +47,7 @@ router.post('/send-certificate/:id',celebrate({
         idEvent: Joi.string().required(),
     })
 }), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.sendCertificate)
-router.get('/find-users-for-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents)
+router.get('/find-users-for-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents) //TERMINAR
 router.get('/testeMiddleware', decodeTokenMiddleware, tokenMiddleware, (req: Request, res: Response) => {
     res.sendStatus(200)
 })
