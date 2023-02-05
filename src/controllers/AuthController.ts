@@ -22,7 +22,7 @@ class AuthController {
             loggerError("Credenciais invalidas")
             return res.sendStatus(401);
         }
-        const token = cadastraToken({ id: userExists.id, role: userExists.role })
+        const token = cadastraToken({ id: userExists.id, role: userExists.role, permiteVerificacao: userExists.permiteVerificacao})
         delete userExists.senha;
         loggerInfo("Usuario autenticado")
         return res.json({

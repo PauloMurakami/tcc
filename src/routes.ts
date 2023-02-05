@@ -5,6 +5,7 @@ import AuthController from './controllers/AuthController';
 import EventoController from './controllers/EventoController';
 import ProfessorController from './controllers/ProfessorController';
 import { RoleEnumType } from './entity/User';
+import checkPermissionMiddleware from "./middlewares/CheckPermissionMiddlaware";
 import checkRoleMiddleware from './middlewares/CheckRoleMiddleware';
 import decodeTokenMiddleware from './middlewares/DecodeBearerTokenMiddleware';
 import tokenMiddleware from './middlewares/TokenMidlleware';
@@ -15,6 +16,8 @@ router.post('/register', celebrate({
     [Segments.BODY]: Joi.object().keys({
         email: Joi.string().email().required(),
         senha: Joi.string().required(),
+        nome: Joi.string().required(),
+        RA: Joi.number().required()
     }),
 }), AlunoController.register)
 router.post('/auth', celebrate({
@@ -46,7 +49,7 @@ router.post('/send-certificate/:id',celebrate({
     [Segments.BODY]: Joi.object().keys({
         idEvent: Joi.string().required(),
     })
-}), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.sendCertificate)
+}), decodeTokenMiddleware, checkPermissionMiddleware, EventoController.sendCertificate)
 router.get('/find-users-for-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents) //TERMINAR
 
 router.put('/give-permission/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.verifyEvent)

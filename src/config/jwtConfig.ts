@@ -7,5 +7,5 @@ export function verificaToken(token: string) {
 }
 
 export function cadastraToken(object: any) {
-    return sign({ id: object.id, role: object.role}, tokenVerifyCode, { expiresIn: '1d' })
+    return sign({ id: object.id, role: object.role, permiteVerificacao: object.permiteVerificacao}, tokenVerifyCode, { expiresIn: '1d' })
 }

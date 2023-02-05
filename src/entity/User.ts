@@ -13,7 +13,9 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @Column()
+    @Column({
+        default: 0
+    })
     RA: number
     
     @Column()
@@ -41,7 +43,6 @@ export class User {
     eventos: Evento[]
 
     @BeforeInsert()
-    @BeforeUpdate()
     hashSenha(){
         this.senha = hashSync(this.senha, 8)
     }

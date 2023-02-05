@@ -3,6 +3,7 @@ import { RoleEnumType } from '../entity/User';
 
 interface Locals {
   tokenData?: {
+    permiteVerificacao: any;
     id: string
     role: RoleEnumType
   };

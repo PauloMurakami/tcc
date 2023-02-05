@@ -9,14 +9,14 @@ class AlunoController {
         loggerInfo("exec register usuario")
 
         const userRepository = AppDataSource.getRepository(User)
-        const { email, senha, nome } = req.body
+        const { email, senha, nome, RA } = req.body
         const userExists = await userRepository.findOne({ where: { email } })
 
         if (userExists) {
             loggerError("Usuario ja existente")
             return res.sendStatus(409);
         }
-        const user = userRepository.create({ nome, email, senha })
+        const user = userRepository.create({ nome, email, senha, RA})
       
         await userRepository.save(user)
         delete user.senha;
@@ -39,7 +39,7 @@ class AlunoController {
             return res.sendStatus(400);
         }
         userExists.permiteVerificacao = true;
-
+        delete userExists.senha;
         await userRepository.save(userExists);
         return res.sendStatus(204)
     }
@@ -57,6 +57,7 @@ class AlunoController {
             return res.sendStatus(400);
         }
         userExists.permiteVerificacao = false;
+        delete userExists.senha;
 
         await userRepository.save(userExists);
         return res.sendStatus(204)
