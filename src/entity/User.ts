@@ -13,7 +13,7 @@ export class User {
     @PrimaryGeneratedColumn('uuid')
     id: string
 
-    @PrimaryColumn()
+    @Column()
     RA: number
     
     @Column()
@@ -24,6 +24,11 @@ export class User {
 
     @Column()
     senha: string
+
+    @Column({
+        default: false
+    })
+    permiteVerificacao: boolean
 
     @Column({
         type: 'enum',

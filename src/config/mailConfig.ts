@@ -1,6 +1,6 @@
 class Configs {
-    public user = 'email hotmail';
-    public password = 'senha';
+    public user = 'emailcertificados@gmail.com';
+    public password = 'jwkzvzmygvadbnxr';
 }
 
 export default new Configs;

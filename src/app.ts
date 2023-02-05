@@ -12,10 +12,11 @@ AppDataSource.initialize().then(async () => {
   const nome = process.env.USUARIO;
   const senha = process.env.SENHA;
   const email = process.env.EMAIL;
+  const permiteVerificacao = true;
   const userExists = await userRepository.findOne({ where: { email } })
-  if(!userExists){
+  if (!userExists) {
     const role = RoleEnumType.FACULDADE;
-    const user = userRepository.create({ nome, email, senha})
+    const user = userRepository.create({ nome, email, senha, permiteVerificacao })
     user.role = role;
     await userRepository.save(user)
     console.log("Usuario Sistemico criado")
@@ -26,6 +27,6 @@ AppDataSource.initialize().then(async () => {
 app.use(express.json())
 app.use(cors())
 app.use(router)
-app.listen(8080, ()=>{
-    console.log('Servidor esta rodando na porta 8080')
+app.listen(8080, () => {
+  console.log('Servidor esta rodando na porta 8080')
 })

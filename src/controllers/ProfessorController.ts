@@ -13,7 +13,8 @@ class ProfessorController {
         if (userExists) {
             return res.sendStatus(409);
         }
-        const user = userRepository.create({ nome, email, senha })
+        let permiteVerificacao = true
+        const user = userRepository.create({ nome, email, senha, permiteVerificacao })
         user.role = role;
         await userRepository.save(user)
         delete user.senha;

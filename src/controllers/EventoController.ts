@@ -98,6 +98,7 @@ class EventoController {
             const idEvent = req.body.idEvent
             const eventoRepository = AppDataSource.getRepository(Evento);
             const userRepository = AppDataSource.getRepository(User);
+            const userEventoRepository = AppDataSource.getRepository(ListaDeCadastrados);
 
             const eventoExistente = await eventoRepository.findOne({ where: { id: idEvent } })
             if (!eventoExistente) {
@@ -109,6 +110,15 @@ class EventoController {
             if (!usuarioExistente) {
                 loggerError("Usuario não encontrado!");
                 throw new Error("Usuario não encontrado");
+            }
+
+            const usuarioCadastradoNoEvento = await userEventoRepository.find({where: {
+                evento : idEvent,
+                usuario: id
+            }});
+            if(!usuarioCadastradoNoEvento || usuarioCadastradoNoEvento.length <= 0){
+                loggerError("Usuario não cadastrado no evento!");
+                throw new Error("Usuario não cadastrado no evento");
             }
             await criarPDF({
                 html: `
@@ -128,7 +138,7 @@ class EventoController {
                 id: usuarioExistente.id
             })
             let mailOptions = {
-                from: 'paulolindus@hotmail.com',
+                from: config.user,
                 to: usuarioExistente.email,
                 subject: "teste",
                 html: '',
@@ -140,7 +150,7 @@ class EventoController {
             };
     
             const transporter = nodemailer.createTransport({
-                service: 'Hotmail',
+                service: 'gmail',
                 auth: {
                     user: config.user,
                     pass: config.password
@@ -149,6 +159,7 @@ class EventoController {
             loggerInfo("Enviando email")
             return transporter.sendMail(mailOptions, async function (error, info) {
                 if (error) {
+                    await deletarPDF(id)
                     res.send({message: 'Erro ao enviar o email'}).status(500)
                 } else {
                     await deletarPDF(id)

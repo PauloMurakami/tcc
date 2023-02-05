@@ -7,13 +7,13 @@ export default async function tokenMiddleware(req: Request, res: Response, next:
         loggerInfo("Start token validation");
         const { authorization } = req.headers;
         if (!authorization) {
-            throw new Error("");
+            return res.sendStatus(401);
         }
         const token = authorization.replace('Barer', '').trim();
 
         const data: any = verificaToken(token)
         next();
     } catch {
-        res.sendStatus(401);
+        return res.sendStatus(401);
     }
 }

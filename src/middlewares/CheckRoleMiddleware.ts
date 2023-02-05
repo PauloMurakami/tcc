@@ -9,15 +9,15 @@ export default function checkRoleMiddleware(role: RoleEnumType){
             loggerInfo("Start a check role is valid");
             const { tokenData } = res.locals;
             if (!tokenData) {
-                throw new Error("");
+                return res.sendStatus(401);
             }
             loggerInfoItem("Token role:", tokenData?.role)
             if (tokenData?.role != role) {
-                res.sendStatus(401);
+                return res.sendStatus(401);
             }
             next();
         } catch {
-            res.sendStatus(401);
+            return res.sendStatus(401);
         }
     }
 } 
