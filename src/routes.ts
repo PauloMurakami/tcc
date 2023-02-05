@@ -36,7 +36,7 @@ router.post('/register-event',celebrate({
         quantidadeDeHoras: Joi.number().required(),
         quantidadeDeVagas: Joi.number().required(),
         descricao: Joi.string().required(),
-        data: Joi.date().required()
+        data: Joi.string().required()
     })
 }), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.createEvento)
 router.get('/find-events-open', decodeTokenMiddleware, tokenMiddleware, EventoController.findEventsOpen)
@@ -48,6 +48,10 @@ router.post('/send-certificate/:id',celebrate({
     })
 }), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.sendCertificate)
 router.get('/find-users-for-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents) //TERMINAR
+
+router.put('/give-permission/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.verifyEvent)
+router.put('/take-permission/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.notVerifyEvent)
+
 router.get('/testeMiddleware', decodeTokenMiddleware, tokenMiddleware, (req: Request, res: Response) => {
     res.sendStatus(200)
 })

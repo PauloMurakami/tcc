@@ -12,6 +12,9 @@ export default async function DecodeTokenMiddleware(req: Request, res: Response,
         const token = authorization.replace('Bearer', '').trim();
 
         const data: any = verificaToken(token)
+        if(!verificaToken){
+            return res.sendStatus(401);
+        }
         res.locals.tokenData = data
         next();
     } catch {

@@ -26,6 +26,43 @@ class AlunoController {
             user
         })
     }
+    async verifyEvent(req: Request, res: Response){
+
+        const id = req.params.id;
+
+        const userRepository = AppDataSource.getRepository(User);
+
+        const userExists = await userRepository.findOne({where:{id: id}})
+
+        if(!userExists){
+            loggerError("Usuario não existe!")
+            return res.sendStatus(400);
+        }
+        userExists.permiteVerificacao = true;
+
+        await userRepository.save(userExists);
+        return res.sendStatus(204)
+    }
+
+    async notVerifyEvent(req: Request, res: Response){
+
+        const id = req.params.id;
+
+        const userRepository = AppDataSource.getRepository(User);
+
+        const userExists = await userRepository.findOne({where:{id: id}})
+
+        if(!userExists){
+            loggerError("Usuario não existe!")
+            return res.sendStatus(400);
+        }
+        userExists.permiteVerificacao = false;
+
+        await userRepository.save(userExists);
+        return res.sendStatus(204)
+    }
+
+
     async findUserByEvents(req: Request, res: Response){
 
         //TERMINAR
