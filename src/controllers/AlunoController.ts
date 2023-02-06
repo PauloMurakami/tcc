@@ -11,8 +11,8 @@ class AlunoController {
         const userRepository = AppDataSource.getRepository(User)
         const { email, senha, nome, RA } = req.body
         const userExists = await userRepository.findOne({ where: { email } })
-
-        if (userExists) {
+        const userExistsRA = await userRepository.findOne({ where: { RA } })
+        if (userExists || userExistsRA) {
             loggerError("Usuario ja existente")
             return res.sendStatus(409);
         }

@@ -33,6 +33,18 @@ router.post('/register-teacher',celebrate({
         senha: Joi.string().required(),
     })
 }), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.register)
+
+router.get('/list-teacher',decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.list)
+router.get('/list-teacher/:id',decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.professor)
+router.put('/update-teacher/:id',celebrate({
+    [Segments.BODY]: Joi.object().keys({
+        email: Joi.string().email(),
+        senha: Joi.string(),
+        nome: Joi.string(),
+        RA: Joi.number()
+    })
+}), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.update)
+
 router.post('/register-event',celebrate({
     [Segments.BODY]: Joi.object().keys({
         nome: Joi.string().required(),

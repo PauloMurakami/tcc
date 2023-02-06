@@ -48,3 +48,6 @@ export class User {
     }
 
 }
+export function hashSenha(senha: string){
+    return hashSync(senha, 8)
+}

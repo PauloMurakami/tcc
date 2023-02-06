@@ -11,10 +11,10 @@ export default async function tokenMiddleware(req: Request, res: Response, next:
         }
         const token = authorization.replace('Barer', '').trim();
 
-        if(verificaToken(token)){
+        const data: any = verificaToken(token)
+        if(!verificaToken(token)){
             return res.sendStatus(401);
         }
-        const data: any = verificaToken(token)
         next();
     } catch {
         return res.sendStatus(401);
