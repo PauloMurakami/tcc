@@ -26,26 +26,26 @@ router.post('/auth', celebrate({
         senha: Joi.string().required(),
     }),
 }), AuthController.autenticacao)
-router.post('/register-teacher',celebrate({
+router.post('/register-teacher', celebrate({
     [Segments.BODY]: Joi.object().keys({
         email: Joi.string().email().required(),
         nome: Joi.string().required(),
         senha: Joi.string().required(),
     })
-}), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.register)
+}), decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.register)
 
-router.get('/list-teacher',decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.list)
-router.get('/list-teacher/:id',decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.professor)
-router.put('/update-teacher/:id',celebrate({
+router.get('/list-teacher', decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.list)
+router.get('/list-teacher/:id', decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.professor)
+router.put('/update-teacher/:id', celebrate({
     [Segments.BODY]: Joi.object().keys({
         email: Joi.string().email(),
         senha: Joi.string(),
         nome: Joi.string(),
         RA: Joi.number()
     })
-}), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.update)
+}), decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.FACULDADE), ProfessorController.update)
 
-router.post('/register-event',celebrate({
+router.post('/register-event', celebrate({
     [Segments.BODY]: Joi.object().keys({
         nome: Joi.string().required(),
         quantidadeDeHoras: Joi.number().required(),
@@ -57,15 +57,16 @@ router.post('/register-event',celebrate({
 router.get('/find-events-open', decodeTokenMiddleware, tokenMiddleware, EventoController.findEventsOpen)
 router.get('/join-event/:id', decodeTokenMiddleware, tokenMiddleware, EventoController.joinEvent)
 router.get('/find-events', decodeTokenMiddleware, tokenMiddleware, EventoController.findEvents)
-router.post('/send-certificate/:id',celebrate({
+router.post('/send-certificate/:id', celebrate({
     [Segments.BODY]: Joi.object().keys({
         idEvent: Joi.string().required(),
     })
-}), decodeTokenMiddleware, checkPermissionMiddleware, EventoController.sendCertificate)
-router.get('/find-users-for-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents) //TERMINAR
+}), decodeTokenMiddleware, checkPermissionMiddleware, EventoController.sendCertificate);
+router.put('/send-certificate/:id', decodeTokenMiddleware, tokenMiddleware, EventoController.sendCertificateValidated);
+router.get('/find-users-for-event/:id', decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.findUserByEvents) //TERMINAR
 
-router.put('/give-permission/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.verifyEvent)
-router.put('/take-permission/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.notVerifyEvent)
+router.put('/give-permission/:id', decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.verifyEvent)
+router.put('/take-permission/:id', decodeTokenMiddleware, tokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), AlunoController.notVerifyEvent)
 
 router.get('/testeMiddleware', decodeTokenMiddleware, tokenMiddleware, (req: Request, res: Response) => {
     res.sendStatus(200)
