@@ -4,6 +4,7 @@ import router from "./routes"
 import cors from 'cors';
 import { RoleEnumType, User } from "./entity/User";
 require('dotenv').config();
+const { errors } = require('celebrate');
 
 const app = express()
 
@@ -27,6 +28,7 @@ AppDataSource.initialize().then(async () => {
 app.use(express.json())
 app.use(cors())
 app.use(router)
+app.use(errors());
 app.listen(8080, () => {
   console.log('Servidor esta rodando na porta 8080')
 })
