@@ -50,10 +50,13 @@ router.post('/register-event', celebrate({
         nome: Joi.string().required(),
         quantidadeDeHoras: Joi.number().required(),
         quantidadeDeVagas: Joi.number().required(),
+        nomePalestrante: Joi.string().required(),
         descricao: Joi.string().required(),
         data: Joi.string().required()
     })
 }), decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.createEvento)
+
+router.delete('/delete-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.deleteEvento)
 router.get('/find-events-open', decodeTokenMiddleware, tokenMiddleware, EventoController.findEventsOpen)
 router.get('/join-event/:id', decodeTokenMiddleware, tokenMiddleware, EventoController.joinEvent)
 router.get('/find-events', decodeTokenMiddleware, tokenMiddleware, EventoController.findEvents)

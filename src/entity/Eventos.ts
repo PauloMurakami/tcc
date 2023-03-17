@@ -23,6 +23,9 @@ export class Evento {
     quantidadeDeVagas: number;
 
     @Column()
+    nomePalestrante: string;
+
+    @Column()
     descricao: string;
 
     @Column()

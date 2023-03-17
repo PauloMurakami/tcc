@@ -13,18 +13,34 @@ class EventoController {
         loggerInfo("exec createEvento");
         const userRepository = AppDataSource.getRepository(User);
         const eventoRepository = AppDataSource.getRepository(Evento);
-        const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data } = req.body
+        const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data, nomePalestrante } = req.body
         const userId = res.locals.tokenData.id;
         const userExists = await userRepository.findOne({ where: { id: userId } })
         if (!userExists) {
             res.sendStatus(401);
         }
-        const evento = eventoRepository.create({ nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data, user: userExists })
+        const evento = eventoRepository.create({ nome, quantidadeDeHoras, quantidadeDeVagas, nomePalestrante, descricao, data, user: userExists })
 
         await eventoRepository.save(evento)
 
         res.sendStatus(200);
 
+    }
+    async deleteEvento(req: Request, res: Response) {
+        try {
+            loggerInfo("exec deleteEvento");
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const id = req.params.id;
+            const eventosExistente = await eventoRepository.findOne({ where: { id: id } })
+
+            if (!eventosExistente) {
+                throw new Error("Evento não encontrado!");
+            }
+            eventoRepository.delete(id)
+            res.sendStatus(202);
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+        }
     }
     async findEvents(req: Request, res: Response) {
         loggerInfo("exec findEvents");
@@ -201,11 +217,11 @@ async function SendMail(usuarioExistente: User, id: string) {
     loggerInfo("Enviando email");
     return transporter.sendMail(mailOptions, async function (error, info) {
         if (error) {
-            loggerError("erro ao enviar o email para o id: "+ id)
+            loggerError("erro ao enviar o email para o id: " + id)
             await deletarPDF(id);
         } else {
             await deletarPDF(id);
-            loggerInfo("Email enviado para o id: "+ id);
+            loggerInfo("Email enviado para o id: " + id);
         }
     });
 }
