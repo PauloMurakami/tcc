@@ -49,7 +49,19 @@ export class Evento {
     @AfterLoad()
     verificaData() {
         if(this.data < new Date() && this.status != EnumStatus.CANCELADO) {
-            this.status = EnumStatus.FECHADO;
+            const date1 = new Date(this.data);
+            const date2 = new Date();
+            const hoursDiff = diffHours(date1, date2);
+            if(hoursDiff > this.quantidadeDeHoras){
+                this.status = EnumStatus.FECHADO;
+            }
         }
+        function diffHours(date1: Date, date2: Date): number {
+            const timeDiff = Math.abs(date2.getTime() - date1.getTime());
+            const diffHours = Math.ceil(timeDiff / (1000 * 3600)); 
+            return diffHours;
+          }
     }
+
+     
 }

@@ -58,6 +58,7 @@ router.post('/register-event', celebrate({
 
 router.delete('/delete-event/:id', decodeTokenMiddleware, checkRoleMiddleware(RoleEnumType.PROFESSOR), EventoController.deleteEvento)
 router.get('/find-events-open', decodeTokenMiddleware, tokenMiddleware, EventoController.findEventsOpen)
+router.get('/find-events-joined/', decodeTokenMiddleware, tokenMiddleware, EventoController.findEventsJoined)
 router.get('/join-event/:id', decodeTokenMiddleware, tokenMiddleware, EventoController.joinEvent)
 router.get('/find-events', decodeTokenMiddleware, tokenMiddleware, EventoController.findEvents)
 router.post('/send-certificate/:id', celebrate({

@@ -6,65 +6,79 @@ import { loggerError, loggerInfo } from '../utils/logger';
 
 class AlunoController {
     async register(req: Request, res: Response) {
-        loggerInfo("exec register usuario")
+        try {
+            loggerInfo("exec register usuario")
 
-        const userRepository = AppDataSource.getRepository(User)
-        const { email, senha, nome, RA } = req.body
-        const userExists = await userRepository.findOne({ where: { email } })
-        const userExistsRA = await userRepository.findOne({ where: { RA } })
-        if (userExists || userExistsRA) {
-            loggerError("Usuario ja existente")
-            return res.sendStatus(409);
+            const userRepository = AppDataSource.getRepository(User)
+            const { email, senha, nome, RA } = req.body
+            const userExists = await userRepository.findOne({ where: { email } })
+            const userExistsRA = await userRepository.findOne({ where: { RA } })
+            if (userExists || userExistsRA) {
+                loggerError("Usuario ja existente")
+                return res.sendStatus(409);
+            }
+            const user = userRepository.create({ nome, email, senha, RA })
+
+            await userRepository.save(user)
+            delete user.senha;
+            delete user.role;
+            loggerInfo("usuario registrado")
+            return res.json({
+                user
+            })
+
+        } catch (error) {
+            return res.sendStatus(500);
+
         }
-        const user = userRepository.create({ nome, email, senha, RA})
-      
-        await userRepository.save(user)
-        delete user.senha;
-        delete user.role;
-        loggerInfo("usuario registrado")
-        return res.json({
-            user
-        })
     }
-    async verifyEvent(req: Request, res: Response){
+    async verifyEvent(req: Request, res: Response) {
+        try {
+            const id = req.params.id;
 
-        const id = req.params.id;
+            const userRepository = AppDataSource.getRepository(User);
 
-        const userRepository = AppDataSource.getRepository(User);
+            const userExists = await userRepository.findOne({ where: { id: id } })
 
-        const userExists = await userRepository.findOne({where:{id: id}})
+            if (!userExists) {
+                loggerError("Usuario não existe!")
+                return res.sendStatus(400);
+            }
+            userExists.permiteVerificacao = true;
+            delete userExists.senha;
+            await userRepository.save(userExists);
+            return res.sendStatus(204)
+        } catch (error) {
+            return res.sendStatus(500);
 
-        if(!userExists){
-            loggerError("Usuario não existe!")
-            return res.sendStatus(400);
         }
-        userExists.permiteVerificacao = true;
-        delete userExists.senha;
-        await userRepository.save(userExists);
-        return res.sendStatus(204)
-    }
-
-    async notVerifyEvent(req: Request, res: Response){
-
-        const id = req.params.id;
-
-        const userRepository = AppDataSource.getRepository(User);
-
-        const userExists = await userRepository.findOne({where:{id: id}})
-
-        if(!userExists){
-            loggerError("Usuario não existe!")
-            return res.sendStatus(400);
-        }
-        userExists.permiteVerificacao = false;
-        delete userExists.senha;
-
-        await userRepository.save(userExists);
-        return res.sendStatus(204)
     }
 
+    async notVerifyEvent(req: Request, res: Response) {
+        try {
+            const id = req.params.id;
 
-    async findUserByEvents(req: Request, res: Response){
+            const userRepository = AppDataSource.getRepository(User);
+    
+            const userExists = await userRepository.findOne({ where: { id: id } })
+    
+            if (!userExists) {
+                loggerError("Usuario não existe!")
+                return res.sendStatus(400);
+            }
+            userExists.permiteVerificacao = false;
+            delete userExists.senha;
+    
+            await userRepository.save(userExists);
+            return res.sendStatus(204)            
+        } catch (error) {
+            return res.sendStatus(500);
+        }
+
+    }
+
+
+    async findUserByEvents(req: Request, res: Response) {
 
         //TERMINAR
         loggerInfo("exec findUserByEventso")
@@ -73,11 +87,11 @@ class AlunoController {
         let usuarios: any[] = [];
         const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados)
         const userExists = await listaDeCadastradosRepository.find({ where: { evento: id } })
-        if(!userExists){
+        if (!userExists) {
 
         }
         for (const user of userExists) {
-            const findUser = await userRepository.findOne({ where: { id : user.usuario } })
+            const findUser = await userRepository.findOne({ where: { id: user.usuario } })
             delete findUser.senha;
             delete findUser.role;
             usuarios.push(findUser)

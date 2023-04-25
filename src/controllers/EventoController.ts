@@ -7,23 +7,31 @@ import * as nodemailer from "nodemailer";
 import config from '../config/mailConfig';
 import { criarPDF, deletarPDF } from "../utils/pdf";
 import { loggerError, loggerInfo, loggerWarn, loggerWarnItem } from "../utils/logger";
+import { Repository } from "typeorm";
 
 class EventoController {
     async createEvento(req: Request, res: Response) {
-        loggerInfo("exec createEvento");
-        const userRepository = AppDataSource.getRepository(User);
-        const eventoRepository = AppDataSource.getRepository(Evento);
-        const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data, nomePalestrante } = req.body
-        const userId = res.locals.tokenData.id;
-        const userExists = await userRepository.findOne({ where: { id: userId } })
-        if (!userExists) {
-            res.sendStatus(401);
+        try {
+            loggerInfo("exec createEvento");
+            const userRepository = AppDataSource.getRepository(User);
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const { nome, quantidadeDeHoras, quantidadeDeVagas, descricao, data, nomePalestrante } = req.body
+            const userId = res.locals.tokenData.id;
+            const userExists = await userRepository.findOne({ where: { id: userId } })
+            if (!userExists) {
+                res.sendStatus(401);
+            }
+            let dataFormatada = JSON.parse(data)
+            const evento = eventoRepository.create({ nome, quantidadeDeHoras, quantidadeDeVagas, nomePalestrante, descricao, data: dataFormatada, user: userExists })
+
+            await eventoRepository.save(evento)
+
+            res.sendStatus(200);
+
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+
         }
-        const evento = eventoRepository.create({ nome, quantidadeDeHoras, quantidadeDeVagas, nomePalestrante, descricao, data, user: userExists })
-
-        await eventoRepository.save(evento)
-
-        res.sendStatus(200);
 
     }
     async deleteEvento(req: Request, res: Response) {
@@ -43,20 +51,68 @@ class EventoController {
         }
     }
     async findEvents(req: Request, res: Response) {
-        loggerInfo("exec findEvents");
-        const eventoRepository = AppDataSource.getRepository(Evento);
-        const eventosExistentes = await eventoRepository.find()
-        res.json({
-            eventos: eventosExistentes
-        })
+        try {
+            loggerInfo("exec findEvents");
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            let eventosExistentesParaFechar = await eventoRepository.find();
+            for (const evento of eventosExistentesParaFechar) {
+                if (evento.status == EnumStatus.FECHADO) {
+                    await eventoRepository.update(
+                        evento.id,
+                        evento
+                    );
+                }
+            }
+            const eventosExistentes = await eventoRepository.find()
+            res.json({
+                eventos: eventosExistentes
+            })
+
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+
+        }
     }
     async findEventsOpen(req: Request, res: Response) {
-        loggerInfo("exec findEventsOpen");
-        const eventoRepository = AppDataSource.getRepository(Evento);
-        const eventosExistentes = await eventoRepository.find({ where: { status: EnumStatus.ABERTO } })
-        res.json({
-            eventos: eventosExistentes
-        })
+        try {
+            loggerInfo("exec findEventsOpen");
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            let eventosExistentesParaFechar = await eventoRepository.find();
+            for (const evento of eventosExistentesParaFechar) {
+                if (evento.status == EnumStatus.FECHADO) {
+                    await eventoRepository.update(
+                        evento.id,
+                        evento
+                    );
+                }
+            }
+            const eventosExistentes = await eventoRepository.findBy({ status: EnumStatus.ABERTO })
+            res.json({
+                eventos: eventosExistentes
+            })
+
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+
+        }
+    }
+    async findEventsJoined(req: Request, res: Response) {
+        try {
+            const id = req.params.id;
+            let retornoEventos = []
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            let eventFinded = await eventoRepository.find({ where: { status: EnumStatus.ABERTO } })
+            for (const evento of eventFinded) {
+                retornoEventos.push(evento)
+            }
+            let eventFindedFull = await eventoRepository.find({ where: { status: EnumStatus.CHEIO } })
+            for (const evento of eventFindedFull) {
+                retornoEventos.push(evento)
+            }
+            res.send({ eventos: retornoEventos }).status(200)
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+        }
     }
     async joinEvent(req: Request, res: Response) {
         try {
@@ -104,33 +160,38 @@ class EventoController {
             res.send({ message: "Cadastrado no Evento com sucesso" }).status(200)
         } catch (error) {
             res.status(422).send({ message: error.message })
-
         }
     }
     async sendCertificateValidated(req: Request, res: Response) {
-        loggerInfo("exec sendCertificateValidated");
-        const id = req.params.id;
-        const userId = res.locals.tokenData.id;
-        const userRepository = AppDataSource.getRepository(User);
-        const userEventoRepository = AppDataSource.getRepository(ListaDeCadastrados);
+        try {
 
-        const usuarioExistente = await userRepository.findOne({ where: { id: userId } })
-        if (!usuarioExistente) {
-            loggerError("Usuario não encontrado!");
-            throw new Error("Usuario não encontrado");
-        }
-        const usuarioCadastradoNoEvento = await userEventoRepository.findOne({
-            where: {
-                evento: id,
-                usuario: userId
+            loggerInfo("exec sendCertificateValidated");
+            const id = req.params.id;
+            const userId = res.locals.tokenData.id;
+            const userRepository = AppDataSource.getRepository(User);
+            const userEventoRepository = AppDataSource.getRepository(ListaDeCadastrados);
+
+            const usuarioExistente = await userRepository.findOne({ where: { id: userId } })
+            if (!usuarioExistente) {
+                loggerError("Usuario não encontrado!");
+                throw new Error("Usuario não encontrado");
             }
-        });
-        if (!usuarioCadastradoNoEvento) {
-            loggerError("Usuario não cadastrado no evento!");
-            throw new Error("Usuario não cadastrado no evento");
+            const usuarioCadastradoNoEvento = await userEventoRepository.findOne({
+                where: {
+                    evento: id,
+                    usuario: userId
+                }
+            });
+            if (!usuarioCadastradoNoEvento) {
+                loggerError("Usuario não cadastrado no evento!");
+                throw new Error("Usuario não cadastrado no evento");
+            }
+            await SendMail(usuarioExistente, userId);
+            return res.send({ message: "Email enviado com sucesso" }).status(200);
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+
         }
-        await SendMail(usuarioExistente, userId);
-        return res.send({ message: "Email enviado com sucesso" }).status(200);
     }
     async sendCertificate(req: Request, res: Response) {
         try {
@@ -178,52 +239,57 @@ class EventoController {
 
 }
 async function SendMail(usuarioExistente: User, id: string) {
-    await criarPDF({
-        html: `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Document</title>
-            </head>
-            <body>
-                <h1>Ola Mundo</h1>
-            </body>
-            </html>
-        `,
-        id: usuarioExistente.id
-    });
-    let mailOptions = {
-        from: config.user,
-        to: usuarioExistente.email,
-        subject: "teste",
-        html: '',
-        attachments: [{
-            filename: `${id}.pdf`,
-            path: `./src/public/assets/${id}.pdf`,
-            contentType: 'application/pdf'
-        }]
-    };
-
-    const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: config.user,
-            pass: config.password
-        },
-    });
-    loggerInfo("Enviando email");
-    return transporter.sendMail(mailOptions, async function (error, info) {
-        if (error) {
-            loggerError("erro ao enviar o email para o id: " + id)
-            await deletarPDF(id);
-        } else {
-            await deletarPDF(id);
-            loggerInfo("Email enviado para o id: " + id);
-        }
-    });
+    try {
+        
+        await criarPDF({
+            html: `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Document</title>
+                </head>
+                <body>
+                    <h1>Aqui vai o certificado </h1>
+                </body>
+                </html>
+            `,
+            id: usuarioExistente.id
+        });
+        let mailOptions = {
+            from: config.user,
+            to: usuarioExistente.email,
+            subject: "teste",
+            html: '',
+            attachments: [{
+                filename: `${id}.pdf`,
+                path: `./src/public/assets/${id}.pdf`,
+                contentType: 'application/pdf'
+            }]
+        };
+    
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: config.user,
+                pass: config.password
+            },
+        });
+        loggerInfo("Enviando email");
+        return transporter.sendMail(mailOptions, async function (error, info) {
+            if (error) {
+                loggerError("erro ao enviar o email para o id: " + id)
+                await deletarPDF(id);
+            } else {
+                await deletarPDF(id);
+                loggerInfo("Email enviado para o id: " + id);
+            }
+        });
+    } catch (error) {
+        return new Error("Email ja enviado");   
+    }
 }
 
 export default new EventoController
