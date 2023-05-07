@@ -96,9 +96,32 @@ class EventoController {
 
         }
     }
+    async findEventsJoinUserAndCheck(req: Request, res: Response){
+        try {
+            const id = req.params.id;
+            let retornoEventos = []
+            const userId = res.locals.tokenData.id;
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados);
+            const eventosCadastrados = await listaDeCadastradosRepository.find({ where: { usuario: userId, emailEnviado: true } })
+            for (const eventoCadastrado of eventosCadastrados) {
+                let evento = await eventoRepository.findOne({ where: { id: eventoCadastrado.evento } });
+                if(evento){
+                    retornoEventos.push({
+                        emailEnviado: eventoCadastrado.emailEnviado,
+                        ...evento
+                    })
+                }
+            }
+            res.send({ eventos: retornoEventos }).status(200)
+        } catch (error) {
+            res.status(422).send({ message: error.message })
+        }
+    }
     async findEventsJoined(req: Request, res: Response) {
         try {
             const id = req.params.id;
+            const userId = res.locals.tokenData.id;
             let retornoEventos = []
             const eventoRepository = AppDataSource.getRepository(Evento);
             let eventFinded = await eventoRepository.find({ where: { status: EnumStatus.ABERTO } })
@@ -111,6 +134,55 @@ class EventoController {
             }
             res.send({ eventos: retornoEventos }).status(200)
         } catch (error) {
+            res.status(422).send({ message: error.message })
+        }
+    }
+    async findEventsUserNotJoin(req: Request, res: Response) {
+        try {
+            let retornoEventos = []
+            loggerInfo("exec findEventsUserJoin");
+            const id = req.params.id;
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados);
+            const userId = res.locals.tokenData.id;
+            const eventoList = await eventoRepository.find({ where: { status: EnumStatus.ABERTO} });
+            for (const evento of eventoList) {
+                const eventosCadastrados = await listaDeCadastradosRepository.findOne({ where: { usuario: userId, evento: evento.id} })
+                if(!eventosCadastrados){
+                    retornoEventos.push({
+                        ...evento
+                    })
+                }
+
+            }
+            res.send({ eventos: retornoEventos }).status(200)
+        } catch (error) {
+
+            res.status(422).send({ message: error.message })
+        }
+    }
+    async findEventsUserJoin(req: Request, res: Response) {
+        try {
+            let retornoEventos = []
+            loggerInfo("exec findEventsUserJoin");
+            const id = req.params.id;
+            const eventoRepository = AppDataSource.getRepository(Evento);
+            const listaDeCadastradosRepository = AppDataSource.getRepository(ListaDeCadastrados);
+            const userId = res.locals.tokenData.id;
+            const eventosCadastrados = await listaDeCadastradosRepository.find({ where: { usuario: userId, emailEnviado: false } })
+            for (const eventoCadastrado of eventosCadastrados) {
+                let evento = await eventoRepository.findOne({ where: { id: eventoCadastrado.evento } });
+                if(evento){
+                    retornoEventos.push({
+                        emailEnviado: eventoCadastrado.emailEnviado,
+                        ...evento
+                    })
+                }
+
+            }
+            res.send({ eventos: retornoEventos }).status(200)
+        } catch (error) {
+
             res.status(422).send({ message: error.message })
         }
     }
@@ -240,7 +312,7 @@ class EventoController {
 }
 async function SendMail(usuarioExistente: User, id: string) {
     try {
-        
+
         await criarPDF({
             html: `
                 <!DOCTYPE html>
@@ -269,7 +341,7 @@ async function SendMail(usuarioExistente: User, id: string) {
                 contentType: 'application/pdf'
             }]
         };
-    
+
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -288,7 +360,7 @@ async function SendMail(usuarioExistente: User, id: string) {
             }
         });
     } catch (error) {
-        return new Error("Email ja enviado");   
+        return new Error("Email ja enviado");
     }
 }
 
